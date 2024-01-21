@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="canvas" width="300" height="300"></canvas>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.141.0/build/three.module.js",
+        "GLTFLoader" : "https://unpkg.com/three@0.141.0/examples/jsm/loaders/GLTFLoader.js"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import {GLTFLoader} from 'GLTFLoader';
+    import * as THREE from 'three';
+
+    let scene = new THREE.Scene();
+    let renderer = new THREE.WebGLRenderer({
+      canvas: document.querySelector('#canvas'),
+      antialias : true
+    });
+    renderer.outputEncoding = THREE.sRGBEncoding;
+
+    let camera = new THREE.PerspectiveCamera(60, 1);
+    camera.position.set(0, 3, -5); // Adjusted camera position
+    camera.lookAt(new THREE.Vector3(0, 1, 0)); // Adjusted lookAt position
+
+    scene.background = new THREE.Color('white');
+    let light = new THREE.DirectionalLight('0xffff00', 2);
+    scene.add(light);
+    
+    let loader = new GLTFLoader();
+    loader.load('shiba/Fox.gltf', function(gltf){
+      gltf.scene.scale.set(0.025, 0.025, 0.025)
+      let character = gltf.scene;
+      scene.add(character);
+
+      
+      let animationClip = gltf.animations[2];
+
+      
+      let mixer = new THREE.AnimationMixer(character);
+
+      
+      let action = mixer.clipAction(animationClip);
+
+      let rotationSpeed = 0.1;
+      let isLeftKeyPressed = false;
+      let isRightKeyPressed = false;
+
+      function handleKeyDown(event) {
+        if (event.key === 'ArrowLeft') {
+          isLeftKeyPressed = true;
+        } else if (event.key === 'ArrowRight') {
+          isRightKeyPressed = true;
+        }
+      }
+
+      function handleKeyUp(event) {
+        if (event.key === 'ArrowLeft') {
+          isLeftKeyPressed = false;
+        } else if (event.key === 'ArrowRight') {
+          isRightKeyPressed = false;
+        } 
+      }
+
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keyup', handleKeyUp);
+
+      
+      action.play();
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        mixer.update(0.04);
+
+        renderer.render(scene, camera);
+
+        if (isLeftKeyPressed) {
+          character.rotation.y += rotationSpeed;
+        } else if (isRightKeyPressed) {
+          character.rotation.y -= rotationSpeed;
+        }
+      }
+
+      animate();
+    });
+  </script>
+        
+</body>
+</html>
