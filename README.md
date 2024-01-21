@@ -1,2 +1,2 @@
 # Gltf_move_fox
-practice move fox to html
+fox_move.html 를 실행하면 됩니당
